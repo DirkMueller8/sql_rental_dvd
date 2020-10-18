@@ -1,0 +1,290 @@
+/* NOTE: These 4 SQL queries investigate the Sakila DVD Rental database. 
+It holds information about a company that rents movie DVDs. 
+This is the accepted solution of project 2 of 
+the "Programming for Data Science with Python" NanoDegree.
+*/
+
+
+/* Query to analyze the length of rental per genre 
+   Slide 1 of powerpoint presentation */
+WITH base_t AS (SELECT genre, ROUND(AVG(LEN_rental), 2) AS mean_len_rental, 
+                       ROUND(VAR_SAMP(LEN_rental), 2) AS len_rental_variance, 
+					   COUNT(*) AS n
+			      FROM
+				  (SELECT c.category_id, c.name AS genre,
+  				    (CAST(r.return_date AS date) - CAST(r.rental_date AS date)) as LEN_rental
+   				     FROM category c
+   				          JOIN film_category AS fc
+     			          ON fc.category_id = c.category_id
+                          JOIN film AS f
+                          ON f.film_id = fc.film_id
+                          JOIN inventory AS i
+                          ON f.film_id = i.film_id
+                          JOIN rental AS r
+                          ON r.inventory_id = i.inventory_id) AS t1
+                    GROUP BY 1
+                    ORDER BY 2 DESC)
+
+/* Extract the lowest and highest value and discard all others: */
+(SELECT *
+   FROM base_t
+  ORDER BY 2 DESC
+  LIMIT 1)
+
+UNION ALL
+
+(SELECT *
+   FROM base_t
+  ORDER BY 2 ASC    
+  LIMIT 1);
+
+
+*************************
+
+/* slide 2: Customer behavior in late returns, case ALL  */
+WITH t1 AS 
+        (SELECT r.inventory_id, DATE_PART('day', return_date - rental_date) AS rental_length
+           FROM rental AS r),
+     t2 AS 
+	    (SELECT c.name AS genre, rental_duration, rental_length,
+		   CASE WHEN rental_duration < rental_length THEN 'late'
+		        WHEN rental_duration > rental_length THEN 'before deadline'
+		        ELSE 'on time' 
+		    END AS status
+		   FROM film AS f
+		   JOIN inventory AS i
+		     ON f.film_id = i.film_id
+		   JOIN film_category fc
+		     ON fc.film_id = f.film_id
+		   JOIN category c
+		     ON c.category_id = fc.category_id
+		   JOIN t1
+		     ON i.inventory_id = t1.inventory_id
+		  WHERE rental_length IS NOT Null)
+
+SELECT status, COUNT(*) AS film_count
+  FROM t2
+ GROUP BY 1
+ ORDER BY status;
+
+*************************
+
+/* slide 2: Customer behavior in late returns, case Sports  */
+WITH t1 AS 
+        (SELECT r.inventory_id, DATE_PART('day', return_date - rental_date) AS rental_length
+           FROM rental AS r),
+     t2 AS 
+	    (SELECT c.name AS genre, rental_duration, rental_length,
+		   CASE WHEN rental_duration < rental_length THEN 'late'
+		        WHEN rental_duration > rental_length THEN 'before deadline'
+		        ELSE 'on time' 
+		    END AS status
+		   FROM film AS f
+		   JOIN inventory AS i
+		     ON f.film_id = i.film_id
+		   JOIN film_category fc
+		     ON fc.film_id = f.film_id
+		   JOIN category c
+		     ON c.category_id = fc.category_id
+		   JOIN t1
+		     ON i.inventory_id = t1.inventory_id
+		  WHERE rental_length IS NOT Null)
+
+SELECT genre, status, COUNT(*) AS film_count
+  FROM t2
+ WHERE genre = 'Sports'
+ GROUP BY 1, 2
+ ORDER BY status;
+
+*************************
+
+/* slide 2: Customer behavior in late returns, case Travel  */
+WITH t1 AS 
+        (SELECT r.inventory_id, DATE_PART('day', return_date - rental_date) AS rental_length
+           FROM rental AS r),
+     t2 AS 
+	    (SELECT c.name AS genre, rental_duration, rental_length,
+		   CASE WHEN rental_duration < rental_length THEN 'late'
+		        WHEN rental_duration > rental_length THEN 'before deadline'
+		        ELSE 'on time' 
+		    END AS status
+		   FROM film AS f
+		   JOIN inventory AS i
+		     ON f.film_id = i.film_id
+		   JOIN film_category fc
+		     ON fc.film_id = f.film_id
+		   JOIN category c
+		     ON c.category_id = fc.category_id
+		   JOIN t1
+		     ON i.inventory_id = t1.inventory_id
+		  WHERE rental_length IS NOT Null)
+
+SELECT genre, status, COUNT(*) AS film_count
+  FROM t2
+ WHERE genre = 'Travel'
+ GROUP BY 1, 2
+ ORDER BY status;
+
+*************************
+
+/* slide 3: seller 1’s performance on a typical weekend: 
+   Friday, 26th of May 2005 */
+SELECT DISTINCT DATE_TRUNC('hours', date), seller, 
+          COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', date) 
+	   ORDER BY seller) amount_rentals
+
+  FROM
+       	        (SELECT rental_id AS r_id, rental_date AS date, staff_id AS seller
+                   FROM rental) AS t1
+          WHERE seller = 1 
+		    AND date >= '2005-05-26 00:00:00' 
+			AND date < '2005-05-27 00:00:00'
+       ORDER BY date_trunc('hours', date);
+
+*************************
+
+/* slide 3: seller 2’s performance on a typical weekend: 
+   Friday, 26th of May 2005 */
+SELECT DISTINCT DATE_TRUNC('hours', date), seller, 
+          COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', date) 
+	   ORDER BY seller) amount_rentals
+
+  FROM
+       	        (SELECT rental_id AS r_id, rental_date AS date, staff_id AS seller
+                   FROM rental) AS t1
+          WHERE seller = 2 
+		    AND date >= '2005-05-26 00:00:00' 
+			AND date < '2005-05-27 00:00:00'
+       ORDER BY date_trunc('hours', date);
+
+*************************
+
+/* slide 3: seller 2’s performance on a typical weekend: 
+   Friday, 26th of May 2005 */
+SELECT DISTINCT DATE_TRUNC('hours', date), seller, 
+          COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', date) 
+	   ORDER BY seller) amount_rentals
+
+  FROM
+       	        (SELECT rental_id AS r_id, rental_date AS date, staff_id AS seller
+                   FROM rental) AS t1
+          WHERE seller = 2 
+		    AND date >= '2005-05-26 00:00:00' 
+			AND date < '2005-05-27 00:00:00'
+       ORDER BY date_trunc('hours', date);
+
+*************************
+
+/* slide 3: seller 1’s performance on a typical weekend: 
+   Saturday, 27th of May 2005 */
+SELECT DISTINCT DATE_TRUNC('hours', date), seller, 
+          COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', date) 
+	   ORDER BY seller) amount_rentals
+
+  FROM
+       	        (SELECT rental_id AS r_id, rental_date AS date, staff_id AS seller
+                   FROM rental) AS t1
+          WHERE seller = 1 
+		    AND date >= '2005-05-27 00:00:00' 
+			AND date < '2005-05-28 00:00:00'
+       ORDER BY date_trunc('hours', date);
+
+*************************
+
+/* slide 3: seller 2’s performance on a typical weekend: 
+   Saturday, 27th of May 2005 */
+SELECT DISTINCT DATE_TRUNC('hours', date), seller, 
+          COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', date) 
+	   ORDER BY seller) amount_rentals
+
+  FROM
+       	        (SELECT rental_id AS r_id, rental_date AS date, staff_id AS seller
+                   FROM rental) AS t1
+          WHERE seller = 2
+		    AND date >= '2005-05-27 00:00:00' 
+			AND date < '2005-05-28 00:00:00'
+       ORDER BY date_trunc('hours', date);
+
+*************************
+
+/* slide 3: seller 1’s performance on a typical weekend: 
+   Sunday, 28th of May 2005 */
+SELECT DISTINCT DATE_TRUNC('hours', date), seller, 
+          COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', date) 
+	   ORDER BY seller) amount_rentals
+
+  FROM
+       	        (SELECT rental_id AS r_id, rental_date AS date, staff_id AS seller
+                   FROM rental) AS t1
+          WHERE seller = 1
+		    AND date >= '2005-05-28 00:00:00' 
+			AND date < '2005-05-29 00:00:00'
+       ORDER BY date_trunc('hours', date);
+
+*************************
+
+/* slide 3: seller 2’s performance on a typical weekend: 
+   Sunday, 28th of May 2005 */
+SELECT DISTINCT DATE_TRUNC('hours', date), seller, 
+          COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', date) 
+	   ORDER BY seller) amount_rentals
+
+  FROM
+       	        (SELECT rental_id AS r_id, rental_date AS date, staff_id AS seller
+                   FROM rental) AS t1
+          WHERE seller = 2
+		    AND date >= '2005-05-28 00:00:00' 
+			AND date < '2005-05-29 00:00:00'
+       ORDER BY date_trunc('hours', date);
+
+*************************
+
+/* slide 4: variation in seller 1’s performance on a typical weekend: 
+   Saturday, 27th of May 2005 */
+SELECT rental_id AS r_id, rental_date AS date, DATE_TRUNC('hours', rental_date) AS date_trunc, staff_id AS seller,
+COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', rental_date)
+	   ORDER BY staff_id) amount_rentals
+FROM rental
+          WHERE staff_id = 1
+		    AND rental_date >= '2005-05-27 00:00:00' 
+			AND rental_date < '2005-05-28 00:00:00'
+       ORDER BY DATE_TRUNC('hours', rental_date);
+
+*************************
+
+/* slide 4: variation in seller 2’s performance on a typical weekend: 
+   Saturday, 27th of May 2005 */
+SELECT rental_id AS r_id, rental_date AS date, DATE_TRUNC('hours', rental_date) AS date_trunc, staff_id AS seller,
+COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', rental_date)
+	   ORDER BY staff_id) amount_rentals
+FROM rental
+          WHERE staff_id = 2
+		    AND rental_date >= '2005-05-27 00:00:00' 
+			AND rental_date < '2005-05-28 00:00:00'
+       ORDER BY DATE_TRUNC('hours', rental_date);
+
+*************************
+
+/* slide 4: variation in seller 1’s performance on a typical weekend: 
+   Sunday, 28th of May 2005 */
+SELECT rental_id AS r_id, rental_date AS date, DATE_TRUNC('hours', rental_date) AS date_trunc, staff_id AS seller,
+COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', rental_date)
+	   ORDER BY staff_id) amount_rentals
+FROM rental
+          WHERE staff_id = 1
+		    AND rental_date >= '2005-05-28 00:00:00' 
+			AND rental_date < '2005-05-29 00:00:00'
+       ORDER BY DATE_TRUNC('hours', rental_date);
+
+*************************
+
+/* slide 4: variation in seller 2’s performance on a typical weekend: 
+   Sunday, 28th of May 2005 */
+SELECT rental_id AS r_id, rental_date AS date, DATE_TRUNC('hours', rental_date) AS date_trunc, staff_id AS seller,
+COUNT (*) OVER (PARTITION BY DATE_TRUNC('hours', rental_date)
+	   ORDER BY staff_id) amount_rentals
+FROM rental
+          WHERE staff_id = 2
+		    AND rental_date >= '2005-05-28 00:00:00' 
+			AND rental_date < '2005-05-29 00:00:00'
+       ORDER BY DATE_TRUNC('hours', rental_date);
