@@ -18,14 +18,14 @@ The following concepts were used widely in this solution:
 - Window Function
 - Common Table Expressions (CTE)
 
-![](https://github.com/DirkMueller8/sql_rental_dvd/blob/master/ER_diagram)
+![](https://github.com/DirkMueller8/sql_rental_dvd/blob/master/ER_diagram.png)
 
 *Fig 1: Entity Relationship Diagram for the Sakila DVD Rental database.*
 
-![](https://github.com/DirkMueller8/sql_rental_dvd/blob/master/snapshot_SQL_query)
+![](https://github.com/DirkMueller8/sql_rental_dvd/blob/master/snapshot_SQL_query.png)
 
 *Fig 2: Excerpt of SQL code to analyze a seller's performance on a typical weekend.*
 
-![](https://github.com/DirkMueller8/sql_rental_dvd/blob/master/snapshot_results)
+![](https://github.com/DirkMueller8/sql_rental_dvd/blob/master/snapshot_results.png)
 
 *Fig 3: Report example of the collated output of several SQL analyses.*
