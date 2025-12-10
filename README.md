@@ -1,4 +1,4 @@
-## Analysis of Sakila DVD Rental database
+# Analysis of the Sakila DVD Rental Database #
 **********************************************
 Software:		PostgreSQL 12 in pgAdmin 4
 
@@ -7,10 +7,13 @@ Version:    	1.0
 Date: 			Sep 19, 2020
 
 Author:			Dirk Mueller
-**********************************************
+**********************************************  
+
+## Objective ##  
 The objective of this software is to fulfill the requirements of project 1 of Udacity's "Programming for Data Science with Python" NanoDegree (https://www.udacity.com/course/programming-for-data-science-nanodegree--nd104). This accepted solution analyzes various aspects of the Sakila DVD Rental database, holding information about a company that rents movie DVDs.
 
-The following concepts were used widely in this solution:
+## SQL Constructs ##  
+The following constructs were used widely in this solution:
 
 - JOINs
 - aggregations
